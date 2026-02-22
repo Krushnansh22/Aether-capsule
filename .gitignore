@@ -1,0 +1,9 @@
+/myenv
+myenv/
+__pycache__/
+.vscode/
+instance/
+*.pyc
+*.pyo
+*.pyd
+.env
