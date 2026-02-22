@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aether Capsule — Messages Across Time</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Reset & Tokens ─────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --void:      #06060f;
+      --deep:      #0b0b1a;
+      --panel:     #0f0f22;
+      --rim:       #1e1a38;
+      --violet:    #6a5acd;
+      --violet-lo: #3d3080;
+      --violet-hi: #9d8eff;
+      --star:      #e8e0ff;
+      --mist:      #a098c0;
+      --ghost:     #4a4070;
+      --danger:    #e05577;
+      --success:   #5ecfa0;
+      --mono:      'Space Mono', monospace;
+      --serif:     'Cormorant Garamond', serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      min-height: 100vh;
+      background: var(--void);
+      color: var(--star);
+      font-family: var(--serif);
+      overflow-x: hidden;
+      cursor: default;
+    }
+
+    /* ─── Starfield ──────────────────────────────────────── */
+    #stars {
+      position: fixed; inset: 0; z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% 30%, #12082a 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 70%, #0a0520 0%, transparent 60%),
+        var(--void);
+    }
+
+    .star-layer {
+      position: absolute; inset: 0;
+      background-image: radial-gradient(1px 1px at var(--x) var(--y), rgba(200,190,255,0.7) 0%, transparent 100%);
+    }
+
+    /* ─── Layout ─────────────────────────────────────────── */
+    main {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column; align-items: center;
+      min-height: 100vh;
+      padding: 64px 24px 80px;
+    }
+
+    /* ─── Header ─────────────────────────────────────────── */
+    .masthead {
+      text-align: center;
+      margin-bottom: 56px;
+      animation: fadeDown 1s ease both;
+    }
+
+    .sigil {
+      display: inline-block;
+      font-size: 52px;
+      margin-bottom: 20px;
+      filter: drop-shadow(0 0 20px rgba(106,90,205,0.6));
+      animation: pulse 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { filter: drop-shadow(0 0 16px rgba(106,90,205,0.5)); }
+      50%       { filter: drop-shadow(0 0 30px rgba(157,142,255,0.8)); }
+    }
+
+    .tagline {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.35em;
+      color: var(--violet);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-size: clamp(36px, 6vw, 58px);
+      font-weight: 300;
+      font-style: italic;
+      color: var(--star);
+      letter-spacing: -0.01em;
+      line-height: 1.15;
+    }
+
+    h1 em {
+      font-style: normal;
+      background: linear-gradient(135deg, var(--violet-hi), #d4aaff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      margin-top: 16px;
+      font-size: 17px;
+      font-weight: 300;
+      color: var(--mist);
+      max-width: 420px;
+      margin-left: auto; margin-right: auto;
+      line-height: 1.65;
+    }
+
+    /* ─── Card ───────────────────────────────────────────── */
+    .card {
+      width: 100%;
+      max-width: 580px;
+      background: var(--panel);
+      border: 1px solid var(--rim);
+      border-radius: 6px;
+      padding: 44px 48px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp 1s 0.2s ease both;
+      box-shadow: 0 0 60px rgba(106,90,205,0.07), 0 24px 64px rgba(0,0,0,0.6);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--violet), var(--violet-hi), var(--violet), transparent);
+      opacity: 0.7;
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      top: -80px; right: -80px;
+      width: 220px; height: 220px;
+      background: radial-gradient(circle, rgba(106,90,205,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ─── Form Fields ────────────────────────────────────── */
+    .field {
+      margin-bottom: 28px;
+    }
+
+    label {
+      display: block;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--violet-hi);
+      margin-bottom: 10px;
+    }
+
+    input[type="email"],
+    textarea {
+      width: 100%;
+      background: var(--deep);
+      border: 1px solid var(--rim);
+      border-radius: 4px;
+      color: var(--star);
+      font-family: var(--serif);
+      font-size: 17px;
+      font-weight: 300;
+      padding: 14px 18px;
+      outline: none;
+      transition: border-color 0.25s, box-shadow 0.25s;
+      resize: none;
+    }
+
+    input[type="email"]::placeholder,
+    textarea::placeholder { color: var(--ghost); font-style: italic; }
+
+    input[type="email"]:focus,
+    textarea:focus {
+      border-color: var(--violet);
+      box-shadow: 0 0 0 3px rgba(106,90,205,0.15);
+    }
+
+    textarea { min-height: 140px; line-height: 1.7; }
+
+    /* ─── Drop Zone ──────────────────────────────────────── */
+    .drop-zone {
+      border: 1px dashed var(--rim);
+      border-radius: 4px;
+      padding: 28px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.25s, background 0.25s;
+      position: relative;
+      background: var(--deep);
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragging {
+      border-color: var(--violet);
+      background: rgba(106,90,205,0.06);
+    }
+
+    .drop-zone input[type="file"] {
+      position: absolute; inset: 0;
+      opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+
+    .drop-icon { font-size: 28px; margin-bottom: 8px; opacity: 0.5; }
+
+    .drop-text {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      color: var(--ghost);
+      text-transform: uppercase;
+    }
+
+    .drop-text span { color: var(--violet-hi); }
+
+    .file-name {
+      margin-top: 10px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--success);
+      letter-spacing: 0.05em;
+      display: none;
+    }
+
+    /* ─── Promise Block ──────────────────────────────────── */
+    .promise {
+      background: rgba(106,90,205,0.06);
+      border: 1px solid rgba(106,90,205,0.2);
+      border-radius: 4px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .promise-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+    .promise-text {
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--mist);
+      line-height: 1.6;
+      font-style: italic;
+    }
+
+    .promise-date {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--violet-hi);
+      letter-spacing: 0.05em;
+      margin-top: 4px;
+    }
+
+    /* ─── Submit Button ──────────────────────────────────── */
+    .btn-seal {
+      width: 100%;
+      padding: 16px;
+      background: transparent;
+      border: 1px solid var(--violet);
+      border-radius: 4px;
+      color: var(--star);
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: color 0.3s, box-shadow 0.3s;
+    }
+
+    .btn-seal::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, var(--violet-lo), var(--violet));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.35s ease;
+      z-index: 0;
+    }
+
+    .btn-seal:hover::before { transform: scaleX(1); }
+    .btn-seal:hover { box-shadow: 0 0 24px rgba(106,90,205,0.4); }
+
+    .btn-seal span { position: relative; z-index: 1; }
+
+    .btn-seal:disabled {
+      opacity: 0.5; cursor: not-allowed;
+    }
+    .btn-seal:disabled::before { display: none; }
+
+    /* ─── States ─────────────────────────────────────────── */
+    .status {
+      margin-top: 20px;
+      padding: 14px 18px;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.05em;
+      display: none;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .status.error {
+      display: block;
+      background: rgba(224,85,119,0.1);
+      border: 1px solid rgba(224,85,119,0.3);
+      color: var(--danger);
+    }
+
+    .status.success {
+      display: block;
+      background: rgba(94,207,160,0.08);
+      border: 1px solid rgba(94,207,160,0.25);
+      color: var(--success);
+    }
+
+    /* ─── Loading Spinner ────────────────────────────────── */
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    /* ─── Success Overlay ────────────────────────────────── */
+    #success-view {
+      display: none;
+      text-align: center;
+      padding: 20px 0;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .success-sigil {
+      font-size: 56px;
+      display: block;
+      margin-bottom: 20px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .success-title {
+      font-size: 28px;
+      font-style: italic;
+      font-weight: 300;
+      color: var(--star);
+      margin-bottom: 12px;
+    }
+
+    .success-body {
+      font-size: 16px;
+      color: var(--mist);
+      font-weight: 300;
+      line-height: 1.7;
+      max-width: 380px;
+      margin: 0 auto 24px;
+    }
+
+    .delivery-badge {
+      display: inline-block;
+      background: rgba(106,90,205,0.12);
+      border: 1px solid rgba(106,90,205,0.3);
+      border-radius: 3px;
+      padding: 10px 20px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      color: var(--violet-hi);
+      text-transform: uppercase;
+    }
+
+    .btn-reset {
+      margin-top: 28px;
+      background: none;
+      border: 1px solid var(--rim);
+      border-radius: 4px;
+      color: var(--ghost);
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-reset:hover { border-color: var(--violet); color: var(--mist); }
+
+    /* ─── Footer ─────────────────────────────────────────── */
+    footer {
+      position: relative; z-index: 1;
+      margin-top: 40px;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: var(--ghost);
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    /* ─── Keyframes ──────────────────────────────────────── */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-8px); }
+    }
+
+    /* ─── Responsive ─────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .card { padding: 32px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="stars" aria-hidden="true"></div>
+
+<main>
+  <!-- Header -->
+  <header class="masthead">
+    <div class="sigil">⟁</div>
+    <p class="tagline">Aether Capsule · Est. Now</p>
+    <h1>A letter to your<br><em>future self</em></h1>
+    <p class="subtitle">
+      Seal a message in the vault today. We'll deliver it exactly 365 days from now —
+      across the threshold of time.
+    </p>
+  </header>
+
+  <!-- Card -->
+  <section class="card" aria-label="Time Capsule Form">
+
+    <!-- Form View -->
+    <div id="form-view">
+      <form id="capsule-form" novalidate>
+
+        <div class="field">
+          <label for="email">Recipient Email</label>
+          <input
+            type="email" id="email" name="email"
+            placeholder="your@email.com"
+            autocomplete="email"
+            required
+          />
+        </div>
+
+        <div class="field">
+          <label for="message">Your Message</label>
+          <textarea
+            id="message" name="message"
+            placeholder="Dear future me, I hope you remember…"
+            required
+          ></textarea>
+        </div>
+
+        <div class="field">
+          <label>Attach a Memory <span style="color:var(--ghost);font-size:9px;letter-spacing:0.1em;">(optional · max 10MB)</span></label>
+          <div class="drop-zone" id="drop-zone" role="button" aria-label="File upload area">
+            <input type="file" id="file-input" name="file" accept="image/*,audio/*,.pdf,.doc,.docx,.txt,.zip" />
+            <div class="drop-icon">☁</div>
+            <div class="drop-text">Drop a file here or <span>browse</span></div>
+            <div class="file-name" id="file-name"></div>
+          </div>
+        </div>
+
+        <div class="promise">
+          <span class="promise-icon">🔒</span>
+          <div>
+            <div class="promise-text">
+              Your capsule will be sealed and stored securely. No one can read it — not even us.
+            </div>
+            <div class="promise-date" id="delivery-preview">Delivery: calculating…</div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-seal" id="submit-btn">
+          <span id="btn-label">✦ Seal the Capsule</span>
+        </button>
+
+        <div class="status" id="status-msg" role="alert"></div>
+
+      </form>
+    </div>
+
+    <!-- Success View -->
+    <div id="success-view" aria-live="polite">
+      <span class="success-sigil">✉</span>
+      <h2 class="success-title">Your capsule is sealed.</h2>
+      <p class="success-body">
+        It has been committed to the vault. In exactly 365 days, it will find its way back to you.
+      </p>
+      <div class="delivery-badge" id="delivery-badge">Delivers: —</div>
+      <br>
+      <button class="btn-reset" id="reset-btn">Seal another capsule</button>
+    </div>
+
+  </section>
+
+  <footer>
+    <p>Aether Capsule · Messages across time · Encrypted at rest</p>
+  </footer>
+</main>
+
+<script>
+  /* ─── Starfield Generator ─────────────────────────── */
+  (function () {
+    const container = document.getElementById('stars');
+    const count = 120;
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement('div');
+      const x = Math.random() * 100;
+      const y = Math.random() * 100;
+      const size = Math.random() < 0.85 ? 1 : 2;
+      const opacity = 0.2 + Math.random() * 0.6;
+      el.style.cssText = `
+        position:absolute;
+        left:${x}%; top:${y}%;
+        width:${size}px; height:${size}px;
+        border-radius:50%;
+        background:rgba(200,190,255,${opacity});
+        animation: twinkle ${2 + Math.random() * 4}s ${Math.random() * 4}s ease-in-out infinite alternate;
+      `;
+      container.appendChild(el);
+    }
+
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes twinkle {
+        from { opacity: 0.1; }
+        to   { opacity: 0.9; }
+      }
+    `;
+    document.head.appendChild(style);
+  })();
+
+  /* ─── Delivery Date Preview ───────────────────────── */
+  (function () {
+    const future = new Date();
+    future.setFullYear(future.getFullYear() + 1);
+    const fmt = future.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    document.getElementById('delivery-preview').textContent = `Delivery: ${fmt}`;
+    document.getElementById('delivery-badge').textContent = `Delivers: ${fmt}`;
+  })();
+
+  /* ─── Drag & Drop File ────────────────────────────── */
+  const dropZone = document.getElementById('drop-zone');
+  const fileInput = document.getElementById('file-input');
+  const fileNameEl = document.getElementById('file-name');
+
+  function setFile(file) {
+    if (!file) return;
+    fileNameEl.style.display = 'block';
+    fileNameEl.textContent = `✓ ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+  }
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) setFile(fileInput.files[0]);
+  });
+
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('dragging');
+  });
+
+  dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('dragging');
+  });
+
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('dragging');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      fileInput.files = dt.files;
+      setFile(file);
+    }
+  });
+
+  /* ─── Form Submission ─────────────────────────────── */
+  const form = document.getElementById('capsule-form');
+  const submitBtn = document.getElementById('submit-btn');
+  const btnLabel = document.getElementById('btn-label');
+  const statusMsg = document.getElementById('status-msg');
+  const formView = document.getElementById('form-view');
+  const successView = document.getElementById('success-view');
+  const resetBtn = document.getElementById('reset-btn');
+
+  function showStatus(type, msg) {
+    statusMsg.className = `status ${type}`;
+    statusMsg.textContent = msg;
+  }
+
+  function clearStatus() {
+    statusMsg.className = 'status';
+    statusMsg.textContent = '';
+  }
+
+  function setLoading(loading) {
+    submitBtn.disabled = loading;
+    btnLabel.innerHTML = loading
+      ? '<span class="spinner"></span> Sealing…'
+      : '✦ Seal the Capsule';
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearStatus();
+
+    const email = document.getElementById('email').value.trim();
+    const message = document.getElementById('message').value.trim();
+
+    if (!email) { showStatus('error', 'Please enter your email address.'); return; }
+    if (!message) { showStatus('error', 'Please write a message to your future self.'); return; }
+
+    setLoading(true);
+
+    try {
+      const formData = new FormData(form);
+
+      const res = await fetch('/api/capsule', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        // Show success
+        formView.style.display = 'none';
+        successView.style.display = 'block';
+      } else {
+        showStatus('error', data.error || 'Something went wrong. Please try again.');
+      }
+    } catch (err) {
+      showStatus('error', 'Connection error. Is the server running?');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  });
+
+  resetBtn.addEventListener('click', () => {
+    form.reset();
+    fileNameEl.style.display = 'none';
+    clearStatus();
+    successView.style.display = 'none';
+    formView.style.display = 'block';
+  });
+</script>
+</body>
+</html>
