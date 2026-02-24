@@ -84,7 +84,7 @@ async def create_capsule(
         logger.info(f"Saved uploaded file: {dest}")
 
     # Schedule delivery 365 days from now
-    send_date = datetime.now() - timedelta(days=1)
+    send_date = datetime.now() + timedelta(days=365)
     try:
         capsule_id = save_capsule(email, message, file_path, send_date)
         logger.info(f"Capsule #{capsule_id} sealed for {email}, delivers on {send_date.date()}")
