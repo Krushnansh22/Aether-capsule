@@ -1,89 +1,95 @@
 # ⟁ Aether Capsule
 
-> Send messages and files to your future self. Delivered exactly 365 days later.
+Send messages and files to your future self. Backend: FastAPI + SQLAlchemy using Supabase (Postgres). A scheduler delivers due capsules via email.
 
-## Project Structure
+## Quick summary
+- FastAPI app serving a simple frontend and API
+- SQLAlchemy models stored in PostgreSQL (Supabase)
+- APScheduler runs daily delivery jobs
+- SMTP used to send emails (use an app password for Gmail)
 
+## Requirements
+- Python 3.10+
+- Dependencies in requirements.txt (install with pip)
+
+## Setup (Windows)
+1. Clone / open project directory:
+   ```powershell
+   cd d:\Aether-Capsule
+   ```
+
+2. Create virtualenv and install:
+   ```powershell
+   python -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   python -m pip install -r requirements.txt
+   ```
+
+3. Create environment file:
+   ```powershell
+   copy .env.example .env
+   # Edit .env and fill values: DATABASE_URL, SMTP_USER, SMTP_PASS, etc.
+   ```
+
+4. Start the app (development):
+   ```powershell
+   python -m uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+   ```
+   Visit: http://localhost:8000
+
+## Important environment variables
+Fill these in `.env` (see .env.example):
+- DATABASE_URL — full Postgres URI from Supabase (postgresql://...?...sslmode=require)
+- SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS — SMTP credentials (use app password for Gmail)
+- SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SECRET_KEY — optional if using Supabase client APIs
+- SECRET_KEY — app secret (keep private)
+
+Never commit real secrets to the repo.
+
+## DB notes
+- The app uses SQLAlchemy and creates the `capsules` table on startup (init_db()).
+- If switching from SQLite to Postgres, ensure DATABASE_URL is correct and accessible.
+- For schema migrations in production consider Alembic.
+
+## Testing DB connectivity
+Use the included test script:
+```powershell
+python test_con.py
 ```
-aether_capsule/
-├── app.py              # Flask server — the Post Office
-├── database.py         # SQLite logic — the Logbook
-├── scheduler.py        # APScheduler — the Sentry
-├── mailer.py           # smtplib email delivery
-├── requirements.txt    # Python dependencies
-├── .env.example        # Environment variable template
-├── static/
-│   └── index.html      # Single-page frontend
-└── capsules/           # Uploaded files (auto-created)
-```
+This runs a simple SELECT version() to confirm connection.
 
-## Quick Start
+## API (high level)
+- GET / — serves frontend
+- POST /api/capsule — create a capsule (form-data: email, message, file, send_date)
+- POST /api/send-capsules — trigger immediate delivery run
 
-### 1. Install dependencies
-```bash
-pip install -r requirements.txt
-```
+Refer to app.py for exact payloads and behavior.
 
-### 2. Configure email credentials
-```bash
-cp .env.example .env
-# Edit .env with your SMTP credentials
-```
+## Scheduler
+- start_scheduler() in scheduler.py schedules a daily delivery job (default 00:01).
+- For development you can trigger delivery via /api/send-capsules or call deliver_due_capsules() manually.
 
-> **Gmail users:** Enable 2-Factor Auth and generate an [App Password](https://myaccount.google.com/apppasswords). Use that as `SMTP_PASS`.
+## Email delivery
+- mailer.py uses SMTP to send messages and optional attachments.
+- Ensure SMTP credentials are valid and port 587 is allowed outbound.
 
-### 3. Load environment variables & run
-```bash
-# Linux / macOS
-export $(grep -v '^#' .env | xargs)
-python app.py
+## Troubleshooting
+- DNS / connection errors to Supabase: verify DATABASE_URL, network/firewall, and Supabase project state.
+- SMTP auth errors: check SMTP_USER and SMTP_PASS (use app password for Gmail).
+- "Tables not created" — check logs for init_db errors and confirm engine can connect.
 
-# Windows (PowerShell)
-Get-Content .env | ForEach-Object { if ($_ -notmatch '^#' -and $_ -ne '') { $k,$v = $_ -split '=',2; [Environment]::SetEnvironmentVariable($k,$v) } }
-python app.py
-```
+## Production notes
+- Run behind a process manager (systemd, supervisor) and a production-ready ASGI server.
+- Move uploaded files out of the repo to object storage (S3) for scalability.
+- Secure keys and restrict CORS/origins.
 
-The server starts at **http://localhost:5000**
+## Files of interest
+- app.py — FastAPI app and endpoints
+- database.py — SQLAlchemy models & DB helpers
+- mailer.py — SMTP sending code
+- scheduler.py — APScheduler jobs
+- test_con.py — DB connectivity tester
+- .env.example — environment template
 
-## How It Works
-
-| Step | What happens |
-|------|-------------|
-| User submits form | Flask receives POST with email, message, optional file |
-| Storage | File saved to `/capsules/`, record inserted into `aether.db` with `send_date = now + 365 days` |
-| Scheduler | APScheduler wakes at **00:01 AM** daily |
-| Delivery | Queries `SELECT * WHERE send_date <= today AND delivered = 0`, sends email via SMTP, marks record delivered |
-
-## Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `SMTP_HOST` | SMTP server hostname | `smtp.gmail.com` |
-| `SMTP_PORT` | SMTP port | `587` |
-| `SMTP_USER` | Your email address | — |
-| `SMTP_PASS` | SMTP password / App Password | — |
-
-## Manual Delivery Test
-
-To test email delivery without waiting a year:
-```python
-# In a Python shell from the project directory:
-from database import init_db, save_capsule, get_due_capsules
-from mailer import send_capsule_email
-from datetime import datetime
-
-init_db()
-
-# Create a test capsule with send_date in the past
-from datetime import timedelta
-cid = save_capsule("you@email.com", "Hello future me!", None, datetime.now() - timedelta(days=1))
-due = get_due_capsules(datetime.now())
-send_capsule_email(due[0])
-```
-
-## Security Notes
-
-- The `/capsules` folder is server-side only — not web-accessible
-- File uploads are validated by extension and capped at 10MB
-- Filenames are sanitized with `werkzeug.utils.secure_filename`
-- SMTP credentials are environment variables, never hardcoded
+## License
+Example code — adapt, secure, and test before production use.

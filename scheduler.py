@@ -2,11 +2,13 @@ import logging
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
 _scheduler = None
-
 
 def deliver_due_capsules():
     """Check for capsules due today and deliver them."""
@@ -32,12 +34,10 @@ def deliver_due_capsules():
 
     logger.info("[Sentry] Delivery run complete.")
 
-
 def start_scheduler():
     global _scheduler
     _scheduler = BackgroundScheduler(daemon=True)
 
-    # Run every day at 00:01 AM
     _scheduler.add_job(
         deliver_due_capsules,
         trigger=CronTrigger(hour=0, minute=1),
@@ -49,7 +49,6 @@ def start_scheduler():
     _scheduler.start()
     logger.info("Scheduler started — Sentry is on duty (runs daily at 00:01).")
     return _scheduler
-
 
 def stop_scheduler():
     global _scheduler

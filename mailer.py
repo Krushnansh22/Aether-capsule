@@ -5,6 +5,9 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
@@ -14,9 +17,7 @@ SMTP_USER = os.environ.get('SMTP_USER', '')
 SMTP_PASS = os.environ.get('SMTP_PASS', '')
 FROM_NAME = 'Aether Capsule'
 
-
 def send_capsule_email(capsule: dict) -> bool:
-    """Send a time capsule email to the recipient. Returns True on success."""
     if not SMTP_USER or not SMTP_PASS:
         logger.error("SMTP credentials not configured. Set SMTP_USER and SMTP_PASS env vars.")
         return False
@@ -27,7 +28,6 @@ def send_capsule_email(capsule: dict) -> bool:
     created_at = capsule.get('created_at', 'one year ago')
 
     try:
-        # Parse created_at for a human-friendly date
         from datetime import datetime
         try:
             dt = datetime.fromisoformat(created_at)
@@ -90,10 +90,8 @@ def send_capsule_email(capsule: dict) -> bool:
         msg.attach(MIMEText(plain, 'plain'))
         msg.attach(MIMEText(html, 'html'))
 
-        # Attach file if present
         if file_path and os.path.exists(file_path):
             filename = os.path.basename(file_path)
-            # Strip the timestamp prefix for display
             parts = filename.split('_', 3)
             display_name = parts[-1] if len(parts) == 4 else filename
 
