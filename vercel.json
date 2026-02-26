@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/send-capsules",
-      "schedule": "* * * * *"
+      "schedule": "12 19 * * *"
     }
   ]
 }
