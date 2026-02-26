@@ -54,17 +54,18 @@ def send_capsule_email(capsule: dict) -> bool:
 <head>
 <meta charset="UTF-8">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Space+Mono:wght@400&display=swap');
-  body {{ margin:0; padding:0; background:#0a0a12; font-family:'Cormorant Garamond',serif; color:#c8c0d8; }}
-  .wrap {{ max-width:620px; margin:40px auto; background:#0f0f1a; border:1px solid #2a2040; border-radius:4px; overflow:hidden; }}
-  .header {{ background:linear-gradient(135deg,#0d0d22 0%,#1a0a2e 100%); padding:48px 40px 40px; text-align:center; border-bottom:1px solid #2a2040; }}
-  .sigil {{ font-size:40px; margin-bottom:16px; }}
-  .title {{ font-size:13px; letter-spacing:0.25em; color:#6a5acd; font-family:'Space Mono',monospace; text-transform:uppercase; margin-bottom:12px; }}
-  .headline {{ font-size:28px; font-weight:300; color:#e8e0f0; line-height:1.3; font-style:italic; }}
-  .body {{ padding:40px; }}
-  .meta {{ font-size:12px; font-family:'Space Mono',monospace; color:#4a3f6b; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:24px; }}
-  .message-box {{ background:#14102a; border-left:2px solid #6a5acd; border-radius:0 4px 4px 0; padding:28px 32px; margin:24px 0; font-size:17px; line-height:1.8; color:#d0c8e8; font-style:italic; white-space:pre-wrap; }}
-  .footer {{ padding:24px 40px; border-top:1px solid #1e1a30; text-align:center; font-size:12px; font-family:'Space Mono',monospace; color:#3a3050; letter-spacing:0.08em; }}
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Montserrat:wght@400;500;600&display=swap');
+  body {{ margin:0; padding:0; background:#0a0a0a; font-family:'Cormorant Garamond', serif; color:#F3EFE6; }}
+  .wrap {{ max-width:620px; margin:40px auto; background:#161616; border:1px solid #2a2a2a; border-radius:2px; overflow:hidden; box-shadow: 0 16px 32px rgba(0,0,0,0.5); }}
+  .header {{ background:#0d0d0d; padding:56px 40px 48px; text-align:center; border-bottom:1px solid #2a2a2a; }}
+  .sigil {{ font-size:42px; margin-bottom:20px; color:#C2A271; }}
+  .title {{ font-size:11px; letter-spacing:0.3em; color:#C2A271; font-family:'Montserrat', sans-serif; text-transform:uppercase; margin-bottom:16px; font-weight:500; }}
+  .headline {{ font-size:32px; font-weight:300; color:#F3EFE6; line-height:1.25; font-style:italic; }}
+  .body {{ padding:48px 48px; }}
+  .meta {{ font-size:10px; font-family:'Montserrat', sans-serif; color:#a39e93; letter-spacing:0.2em; text-transform:uppercase; margin-bottom:24px; font-weight:600; border-bottom:1px solid #2a2a2a; padding-bottom:16px; }}
+  .message-box {{ background:#0a0a0a; border-left:3px solid #8B2627; padding:32px; margin:32px 0; font-size:19px; line-height:1.7; color:#F3EFE6; font-style:italic; white-space:pre-wrap; }}
+  .footer-note {{ font-size:16px; color:#a39e93; line-height:1.6; text-align:center; padding:0 24px; }}
+  .footer {{ padding:32px 40px; border-top:1px solid #2a2a2a; background:#0d0d0d; text-align:center; font-size:10px; font-family:'Montserrat', sans-serif; color:#555555; letter-spacing:0.2em; text-transform:uppercase; }}
 </style>
 </head>
 <body>
@@ -75,14 +76,14 @@ def send_capsule_email(capsule: dict) -> bool:
     <div class="headline">A letter from your past self,<br>sealed on {friendly_date}</div>
   </div>
   <div class="body">
-    <div class="meta">Your message · Unsealed after 365 days</div>
+    <div class="meta">Your Message · Unsealed After 365 Days</div>
     <div class="message-box">{message_text}</div>
-    <p style="font-size:15px;color:#7a6898;line-height:1.7;">
+    <p class="footer-note">
       This message was written by you, for you — sent forward through time. 
       We hope you find it exactly as meaningful as the moment it was sealed.
     </p>
   </div>
-  <div class="footer">aether capsule · memories across time · {friendly_date}</div>
+  <div class="footer">Aether Capsule · Memories Across Time · {friendly_date}</div>
 </div>
 </body>
 </html>"""

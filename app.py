@@ -48,7 +48,7 @@ def send_due_capsules():
 def on_startup():
     init_db()
     start_scheduler()
-    scheduler.add_job(send_due_capsules, "interval", minutes=1, id="send_capsules")
+    scheduler.add_job(send_due_capsules, "interval", minutes=10, id="send_capsules")
     scheduler.start()
     logger.info("Aether Capsule server started. Capsule scheduler running every 1 minute.")
 
@@ -79,7 +79,7 @@ async def create_capsule(
         file_path = str(dest)
         logger.info(f"Saved uploaded file: {dest}")
 
-    send_date = datetime.now() - timedelta(days=1)
+    send_date = datetime.now() + timedelta(days=365)
     try:
         capsule_id = save_capsule(email, message, file_path, send_date)
         logger.info(f"Capsule #{capsule_id} sealed for {email}, delivers on {send_date.date()}")
